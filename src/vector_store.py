@@ -27,7 +27,7 @@ class QdrantStore:
     ) -> None:
         self.url = url or config.QDRANT_URL
         self.collection_name = collection_name or config.COLLECTION_NAME
-        self.client = QdrantClient(url=self.url)
+        self.client = QdrantClient(url=self.url, api_key=config.QDRANT_API_KEY)
 
     def ensure_collection(self, vector_size: int | None = None) -> None:
         dim = vector_size or config.EMBEDDING_DIM
