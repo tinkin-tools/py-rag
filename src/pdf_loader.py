@@ -1,4 +1,8 @@
-"""Carga de texto desde PDF con pypdf."""
+"""Carga de texto desde PDF con pypdf.
+
+Usa ``extraction_mode="layout"``: el modo ``plain`` suele pegar palabras porque
+muchas páginas PDF no guardan el carácter espacio entre runs de texto.
+"""
 
 from __future__ import annotations
 
@@ -10,6 +14,8 @@ from pypdf import PdfReader
 
 def _clean_whitespace(text: str) -> str:
     text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = re.sub(r"[\u00a0\u1680\u2000-\u200a\u202f\u205f\u3000]+", " ", text)
+    text = re.sub(r"(?<!\n)\n(?!\n)", " ", text)
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
@@ -26,6 +32,6 @@ def extract_text_by_page(path: str | Path) -> list[dict]:
     reader = PdfReader(str(path))
     pages: list[dict] = []
     for i, page in enumerate(reader.pages, start=1):
-        raw = page.extract_text() or ""
+        raw = page.extract_text(extraction_mode="layout") or ""
         pages.append({"page": i, "text": _clean_whitespace(raw)})
     return pages
